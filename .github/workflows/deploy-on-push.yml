@@ -6,6 +6,14 @@ jobs:
     steps:
       - name: check out the code to build server
         uses: actions/checkout@v4 
+      - name: Test SSH connectivity
+        run: |
+          echo ">>> SSH 测试开始 <<<"
+          ssh -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            ${{ secrets.SSH_USER_NAME }}@${{ secrets.HOST }} \
+            "echo 'SSH OK: Connected as $(whoami) on $(hostname)'"
       - name: copy file to server
         uses: appleboy/scp-action@master
         with:
