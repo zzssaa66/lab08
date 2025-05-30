@@ -6,6 +6,11 @@ jobs:
     steps:
       - name: check out the code to build server
         uses: actions/checkout@v4 
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
       - name: Debug SSH directory and secret
         run: |
           echo ">>> Listing ~/.ssh directory <<<"
@@ -13,6 +18,17 @@ jobs:
 
           echo ">>> Checking SSH_KEY length <<<"
           echo -n "${{ secrets.SSH_KEY }}" | wc -c
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      - name: Test SSH connectivity
+        run: |
+          echo ">>> SSH 测试开始 <<<"
+          ssh -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            ${{ secrets.SSH_USER_NAME }}@${{ secrets.HOST }} \
+            "echo 'SSH OK: Connected as $(whoami) on $(hostname)'"
       - name: copy file to server
         uses: appleboy/scp-action@master
         with:
