@@ -6,14 +6,13 @@ jobs:
     steps:
       - name: check out the code to build server
         uses: actions/checkout@v4 
-      - name: Test SSH connectivity
+      - name: Debug SSH directory and secret
         run: |
-          echo ">>> SSH 测试开始 <<<"
-          ssh -i ~/.ssh/id_rsa \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            ${{ secrets.SSH_USER_NAME }}@${{ secrets.HOST }} \
-            "echo 'SSH OK: Connected as $(whoami) on $(hostname)'"
+          echo ">>> Listing ~/.ssh directory <<<"
+          ls -la ~/.ssh || true
+
+          echo ">>> Checking SSH_KEY length <<<"
+          echo -n "${{ secrets.SSH_KEY }}" | wc -c
       - name: copy file to server
         uses: appleboy/scp-action@master
         with:
